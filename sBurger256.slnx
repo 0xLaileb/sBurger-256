@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/examples/">
+    <Project Path="examples/sBurger256.Example/sBurger256.Example.csproj" />
+  </Folder>
+  <Folder Name="/solution items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/sBurger256.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/sBurger256.Tests/sBurger256.Tests.csproj" />
+  </Folder>
+</Solution>
