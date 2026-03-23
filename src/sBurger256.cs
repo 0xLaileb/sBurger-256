@@ -1,6 +1,7 @@
 namespace sBurger256;
 
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 /// <summary>
 /// Implements the sBurger-256 symmetric block cipher.
@@ -9,8 +10,12 @@ using System.Runtime.CompilerServices;
 /// Each byte undergoes one round of substitution-permutation transformations
 /// derived from the key.
 /// </para>
+/// <para>
+/// Implements <see cref="IDisposable"/> — call <see cref="Dispose"/> when done
+/// to securely zero the key material in memory.
+/// </para>
 /// </summary>
-public class sBurger256
+public class sBurger256 : IDisposable
 {
     /// <summary>
     /// Required key length in bytes (256 bits).
@@ -24,6 +29,7 @@ public class sBurger256
 
     private byte[] _key = new byte[KeyLength];
     private bool _settingsGenerated;
+    private bool _disposed;
 
     private readonly int[] _b = new int[4];
     private readonly int[] _f = new int[4];
@@ -35,12 +41,16 @@ public class sBurger256
     /// Setting a new key resets internal cipher settings; call
     /// <see cref="GenerationSettings"/> again before encrypting or decrypting.
     /// </para>
+    /// <para>
+    /// The getter returns a <b>copy</b> of the internal key array.
+    /// Mutating the returned array does not affect the cipher state.
+    /// </para>
     /// </summary>
     /// <exception cref="ArgumentNullException">Thrown when the value is <c>null</c>.</exception>
     /// <exception cref="ArgumentException">Thrown when the value length is not 32 bytes.</exception>
     public byte[] Key
     {
-        get => _key;
+        get => (byte[])_key.Clone();
         set
         {
             ArgumentNullException.ThrowIfNull(value);
@@ -58,6 +68,37 @@ public class sBurger256
     }
 
     /// <summary>
+    /// Initializes a new instance of <see cref="sBurger256"/> with a pre-set key
+    /// and pre-generated settings, ready for immediate use.
+    /// </summary>
+    /// <param name="key">A 256-bit (32-byte) encryption key.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="key"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="key"/> length is not 32 bytes.</exception>
+    public sBurger256(byte[] key)
+    {
+        Key = key;
+        GenerationSettings();
+    }
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="sBurger256"/> without a key.
+    /// Set <see cref="Key"/> and call <see cref="GenerationSettings"/> before use.
+    /// </summary>
+    public sBurger256() { }
+
+    /// <summary>
+    /// Securely zeroes the key material in memory and releases managed resources.
+    /// </summary>
+    public void Dispose()
+    {
+        if (_disposed) return;
+        CryptographicOperations.ZeroMemory(_key);
+        _settingsGenerated = false;
+        _disposed = true;
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
     /// Generates the internal cipher settings derived from the current <see cref="Key"/>.
     /// <para>
     /// Must be called once after setting the key and before any
@@ -72,7 +113,7 @@ public class sBurger256
     {
         EnsureKeyIsSet();
 
-        var sumBytes = DefaultTools.SumBytes(_key).ToString();
+        var sumBytes = DefaultTools.SumBytes(_key).ToString().PadLeft(4, '0');
         var positionParameters = CharToDigit(sumBytes[^1]) + CharToDigit(sumBytes[^2]);
 
         Span<int> bits = stackalloc int[8];

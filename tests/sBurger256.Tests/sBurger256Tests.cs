@@ -328,4 +328,147 @@ public class sBurger256Tests
     {
         Assert.Equal(sBurger256.KeyLength, sBurger256.MaxBlockSize);
     }
+
+    // ── Constructor ──────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Constructor_WithValidKey_DoesNotThrow()
+    {
+        var exception = Record.Exception(() => _ = new sBurger256(TestKey));
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void Constructor_WithNullKey_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() => _ = new sBurger256(null!));
+    }
+
+    [Fact]
+    public void Constructor_WithWrongLengthKey_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => _ = new sBurger256(new byte[16]));
+    }
+
+    [Fact]
+    public void Constructor_CipherReadyForEncryptionImmediately()
+    {
+        using var cipher = new sBurger256(TestKey);
+        var data = new byte[] { 0x01, 0x02, 0x03 };
+        var original = (byte[])data.Clone();
+
+        cipher.Encryption(data);
+        cipher.Decryption(data);
+
+        Assert.Equal(original, data);
+    }
+
+    // ── Key getter returns a copy ─────────────────────────────────────────────
+
+    [Fact]
+    public void Key_Getter_ReturnsCopy_MutatingItDoesNotAffectCipher()
+    {
+        using var cipher = new sBurger256(TestKey);
+        var retrieved = cipher.Key;
+        retrieved[0] ^= 0xFF;  // mutate the returned copy
+
+        // Cipher's internal key must be unchanged.
+        Assert.Equal(TestKey, cipher.Key);
+    }
+
+    // ── Small-sum key — regression for Bug #1/#2 ─────────────────────────────
+
+    /// <summary>
+    /// Key whose byte sum is 1–9 (single-digit string). Before the PadLeft fix
+    /// this caused IndexOutOfRangeException in GenerationSettings().
+    /// </summary>
+    [Fact]
+    public void GenerationSettings_KeyWithSingleDigitSum_DoesNotThrow()
+    {
+        // Byte sum = 5 → sumBytes = "5" (1 char without padding)
+        var smallSumKey = new byte[32];
+        smallSumKey[0] = 5;
+
+        var cipher = new sBurger256();
+        cipher.Key = smallSumKey;
+        var exception = Record.Exception(() => cipher.GenerationSettings());
+        Assert.Null(exception);
+    }
+
+    /// <summary>
+    /// Key whose byte sum is 10–99 (two-digit string). Before the fix this caused
+    /// IndexOutOfRangeException on sumBytes[2].
+    /// </summary>
+    [Fact]
+    public void GenerationSettings_KeyWithTwoDigitSum_DoesNotThrow()
+    {
+        // Byte sum = 50 → sumBytes = "50" (2 chars without padding)
+        var smallSumKey = new byte[32];
+        smallSumKey[0] = 50;
+
+        var cipher = new sBurger256();
+        cipher.Key = smallSumKey;
+        var exception = Record.Exception(() => cipher.GenerationSettings());
+        Assert.Null(exception);
+    }
+
+    /// <summary>
+    /// Key whose byte sum is 100–999 (three-digit string). Before the fix this caused
+    /// IndexOutOfRangeException on sumBytes[3].
+    /// </summary>
+    [Fact]
+    public void GenerationSettings_KeyWithThreeDigitSum_DoesNotThrow()
+    {
+        // Byte sum = 255 → sumBytes = "255" (3 chars without padding)
+        var smallSumKey = new byte[32];
+        smallSumKey[0] = 255;
+
+        var cipher = new sBurger256();
+        cipher.Key = smallSumKey;
+        var exception = Record.Exception(() => cipher.GenerationSettings());
+        Assert.Null(exception);
+    }
+
+    [Theory]
+    [InlineData(1,   0, 0)]   // sum = 1   (1-digit)
+    [InlineData(50,  0, 0)]   // sum = 50  (2-digit)
+    [InlineData(255, 0, 0)]   // sum = 255 (3-digit)
+    [InlineData(255, 255, 255)] // sum = 765 (3-digit, near boundary)
+    public void EncryptThenDecrypt_SmallSumKey_RoundtripsCorrectly(byte b0, byte b1, byte b2)
+    {
+        var key = new byte[32];
+        key[0] = b0;
+        key[1] = b1;
+        key[2] = b2;
+
+        using var cipher = new sBurger256(key);
+        var data = new byte[] { 0xDE, 0xAD, 0xBE, 0xEF };
+        var original = (byte[])data.Clone();
+
+        cipher.Encryption(data);
+        cipher.Decryption(data);
+
+        Assert.Equal(original, data);
+    }
+
+    // ── IDisposable ───────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Dispose_ZeroesKeyInMemory()
+    {
+        var cipher = new sBurger256(TestKey);
+        cipher.Dispose();
+
+        // After dispose the key should be all zeroes.
+        Assert.All(cipher.Key, b => Assert.Equal(0, b));
+    }
+
+    [Fact]
+    public void Dispose_CalledTwice_DoesNotThrow()
+    {
+        var cipher = new sBurger256(TestKey);
+        cipher.Dispose();
+        var exception = Record.Exception(() => cipher.Dispose());
+        Assert.Null(exception);
+    }
 }
