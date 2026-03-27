@@ -1,9 +1,58 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <!-- NuGet identity -->
+    <PackageId>sBurger256</PackageId>
+    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Authors>Daniil Laileb</Authors>
+    <Copyright>Copyright © 2026 Daniil Laileb</Copyright>
+    <Title>sBurger-256</Title>
+
+    <!-- Description & discoverability -->
+    <Description>A custom symmetric block cipher for .NET with a 256-bit key and substitution-permutation network. Encrypts and decrypts data blocks of 1–32 bytes using XOR, bit-rotation, and bit-inversion derived from the key. ⚠ Experimental/educational cipher — not audited for production use.</Description>
+    <PackageTags>cipher;encryption;cryptography;symmetric;block-cipher;sbox;substitution-permutation</PackageTags>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <!-- Repository links -->
+    <RepositoryUrl>https://github.com/0xLaileb/sBurger-256</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/0xLaileb/sBurger-256</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/0xLaileb/sBurger-256/releases/tag/v2.0.0</PackageReleaseNotes>
+
+    <!-- XML documentation (IntelliSense in consumer projects) -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- Catches accidental public API removals between versions -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+
+    <!-- Source Link: debugger step-into support -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Reproducible builds -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
+
+  <!-- Иконка и README, вложенные в .nupkg -->
+  <ItemGroup>
+    <None Include="../resources/icon.png" Pack="true" PackagePath="icon.png" />
+    <None Include="../README.md" Pack="true" PackagePath="README.md" />
+  </ItemGroup>
+
+  <!-- Source Link (build-time only, не попадает в зависимости пакета) -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
 
 </Project>

@@ -3,7 +3,6 @@
     <Project Path="examples/sBurger256.Example/sBurger256.Example.csproj" />
   </Folder>
   <Folder Name="/solution items/">
-    <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>
   <Folder Name="/src/">

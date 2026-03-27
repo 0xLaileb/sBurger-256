@@ -1,20 +1,13 @@
-<p align="center">
-  <img src="resources/logo.png?raw=true" alt="sBurger-256 Logo" width="140" />
-</p>
+# 🔐 sBurger-256
 
-<h1 align="center">sBurger-256</h1>
+**A custom symmetric block cipher for .NET with a 256-bit key and substitution-permutation network.**
 
-<p align="center">
-  <b>A custom symmetric block cipher for .NET with a 256-bit key and substitution-permutation network.</b>
-</p>
-
-<p align="center">
-  <a href="https://github.com/0xLaileb/sBurger-256/releases"><img src="https://img.shields.io/github/v/release/0xLaileb/sBurger-256?color=%231DC8EE&label=Release&style=flat-square" alt="Release" /></a>
-  <a href="https://github.com/0xLaileb/sBurger-256/releases"><img src="https://img.shields.io/github/downloads/0xLaileb/sBurger-256/total?color=%231DC8EE&label=Downloads&logo=github&style=flat-square" alt="Downloads" /></a>
-  <a href="https://github.com/0xLaileb/sBurger-256/commits"><img src="https://img.shields.io/github/last-commit/0xLaileb/sBurger-256?color=%231DC8EE&label=Last%20Commit&style=flat-square" alt="Last Commit" /></a>
-  <img src="https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet" alt=".NET 10" />
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
-</p>
+[![Release](https://img.shields.io/github/v/release/0xLaileb/sBurger-256?color=%231DC8EE&label=Release&style=flat-square)](https://github.com/0xLaileb/sBurger-256/releases)
+[![NuGet](https://img.shields.io/nuget/v/sBurger256?color=%231DC8EE&label=NuGet&style=flat-square&logo=nuget)](https://www.nuget.org/packages/sBurger256)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/sBurger256?color=%231DC8EE&label=Downloads&style=flat-square&logo=nuget)](https://www.nuget.org/packages/sBurger256)
+[![Last Commit](https://img.shields.io/github/last-commit/0xLaileb/sBurger-256?color=%231DC8EE&label=Last%20Commit&style=flat-square)](https://github.com/0xLaileb/sBurger-256/commits)
+![.NET 8+](https://img.shields.io/badge/.NET-8.0%2B-512BD4?style=flat-square&logo=dotnet)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 ---
 
@@ -40,9 +33,7 @@
 
 The cipher derives internal transformation parameters from the key, then applies a sequence of XOR, bit-rotation, and bit-inversion operations to each byte of the data block.
 
-<p align="center">
-  <img src="resources/demo_sburger.png?raw=true" alt="sBurger-256 demo" />
-</p>
+![sBurger-256 demo](resources/demo_sburger.png)
 
 > ⚠️ **Note:** This is an author's experimental cipher created for educational purposes. It has not been formally audited. Do not use it for protecting sensitive data in production.
 
@@ -76,17 +67,23 @@ The cipher derives internal transformation parameters from the key, then applies
 
 ### 📦 Installation
 
-#### Option 1 — Project Reference
+#### NuGet Package Manager
 
-Clone the repository and add a project reference:
-
-```xml
-<ProjectReference Include="path\to\src\sBurger256.csproj" />
+```
+dotnet add package sBurger256
 ```
 
-#### Option 2 — Copy the Source File
+Or via the Package Manager Console in Visual Studio:
 
-Copy [`src/sBurger256.cs`](src/sBurger256.cs) directly into your project.
+```
+Install-Package sBurger256
+```
+
+Or add directly to your `.csproj`:
+
+```xml
+<PackageReference Include="sBurger256" Version="2.0.0" />
+```
 
 ---
 
@@ -193,7 +190,6 @@ sBurger-256/
 │   └── 📁 sBurger256.Example/        # Console demo app
 │       ├── 📄 Program.cs
 │       └── 📄 sBurger256.Example.csproj
-├── 📄 Directory.Build.props           # Shared build settings
 ├── 📄 Directory.Packages.props        # Central package management
 ├── 📄 sBurger256.slnx                 # Solution file
 └── 📄 README.md
@@ -216,13 +212,3 @@ Contributions are welcome! To get started:
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
-
-## 📖 Star History
-
-<a href="https://www.star-history.com/#0xLaileb/sBurger-256&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=0xLaileb/sBurger-256&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=0xLaileb/sBurger-256&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=0xLaileb/sBurger-256&type=Date" />
- </picture>
-</a>
