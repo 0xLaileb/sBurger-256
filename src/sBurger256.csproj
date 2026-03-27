@@ -7,9 +7,9 @@
 
     <!-- NuGet identity -->
     <PackageId>sBurger256</PackageId>
-    <Version>2.0.0</Version>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
+    <Version>2.0.1</Version>
+    <AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <FileVersion>2.0.1.0</FileVersion>
     <Authors>Daniil Laileb</Authors>
     <Copyright>Copyright © 2026 Daniil Laileb</Copyright>
     <Title>sBurger-256</Title>
@@ -25,7 +25,7 @@
     <RepositoryUrl>https://github.com/0xLaileb/sBurger-256</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/0xLaileb/sBurger-256</PackageProjectUrl>
-    <PackageReleaseNotes>https://github.com/0xLaileb/sBurger-256/releases/tag/v2.0.0</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/0xLaileb/sBurger-256/releases/tag/v2.0.1</PackageReleaseNotes>
 
     <!-- XML documentation (IntelliSense in consumer projects) -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

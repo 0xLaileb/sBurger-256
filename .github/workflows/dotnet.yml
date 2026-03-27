@@ -1,5 +1,5 @@
 # Build, test, pack, and publish sBurger256 to NuGet.org
-# Publish job runs only when a version tag is pushed (e.g. v2.0.0)
+# Publish job runs only when a version tag is pushed (e.g. v2.0.1)
 
 name: .NET
 

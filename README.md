@@ -33,7 +33,7 @@
 
 The cipher derives internal transformation parameters from the key, then applies a sequence of XOR, bit-rotation, and bit-inversion operations to each byte of the data block.
 
-![sBurger-256 demo](resources/demo_sburger.png)
+![sBurger-256 demo](https://raw.githubusercontent.com/0xLaileb/sBurger-256/refs/heads/master/resources/demo_sburger.png)
 
 > ⚠️ **Note:** This is an author's experimental cipher created for educational purposes. It has not been formally audited. Do not use it for protecting sensitive data in production.
 
@@ -82,7 +82,7 @@ Install-Package sBurger256
 Or add directly to your `.csproj`:
 
 ```xml
-<PackageReference Include="sBurger256" Version="2.0.0" />
+<PackageReference Include="sBurger256" Version="2.0.1" />
 ```
 
 ---
