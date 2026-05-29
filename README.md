@@ -62,8 +62,9 @@ The cipher derives internal transformation parameters from the key, then applies
 
 ### 📌 Prerequisites
 
-- **SDK:** [.NET 10 SDK](https://dotnet.microsoft.com/download) or later
-- **Language:** C# 14
+- **Using the NuGet package:** .NET 8 or later
+- **Building this repository:** [.NET 10 SDK](https://dotnet.microsoft.com/download) or later
+- **Repository language version:** C# 14
 
 ### 📦 Installation
 
@@ -96,9 +97,8 @@ using System.Text;
 // 1. Create a 256-bit key (e.g. from a passphrase via SHA-256).
 byte[] key = SHA256.HashData(Encoding.UTF8.GetBytes("your passphrase"));
 
-// 2. Initialize the cipher and generate settings.
-var cipher = new sBurger256.sBurger256 { Key = key };
-cipher.GenerationSettings();
+// 2. Initialize the cipher. The key constructor generates settings automatically.
+using var cipher = new sBurger256.sBurger256(key);
 
 // 3. Encrypt a 32-byte block.
 byte[] data = Encoding.UTF8.GetBytes("Hello, sBurger-256 cipher test!!");  // 32 bytes
@@ -110,13 +110,13 @@ cipher.Decryption(data);
 Console.WriteLine($"Plaintext:  {Encoding.UTF8.GetString(data)}");
 ```
 
-👉 See the full working demo in [`examples/sBurger256.Example/Program.cs`](examples/sBurger256.Example/Program.cs).
+👉 See the full working demo in [`examples/sBurger256.Example/Program.cs`](https://github.com/0xLaileb/sBurger-256/blob/master/examples/sBurger256.Example/Program.cs).
 
 ---
 
 ## 📚 API Reference
 
-### 🔨 Constructor
+### 🔨 Constructors
 
 ```csharp
 public sBurger256()
@@ -124,11 +124,17 @@ public sBurger256()
 
 Creates a new cipher instance. Set the `Key` property and call `GenerationSettings()` before encrypting or decrypting.
 
+```csharp
+public sBurger256(byte[] key)
+```
+
+Creates a new cipher instance with a non-zero 32-byte key and generates settings immediately.
+
 ### 🏷️ Properties
 
 | Property | Type | Description |
 |---|---|---|
-| `Key` | `byte[]` | The 256-bit (32-byte) encryption key. Validated on set; internally copied. |
+| `Key` | `byte[]` | The 256-bit (32-byte) encryption key. Validated on set; internally copied. All-zero keys are rejected. |
 
 ### 📏 Constants
 
@@ -145,7 +151,7 @@ Creates a new cipher instance. Set the `Key` property and call `GenerationSettin
 public void GenerationSettings()
 ```
 
-Derives internal cipher parameters from the current key. Must be called once after setting the key and before any encryption or decryption. Throws `InvalidOperationException` if the key has not been set.
+Derives internal cipher parameters from the current key. Must be called once after setting the key and before any encryption or decryption unless using the `sBurger256(byte[] key)` constructor. Throws `InvalidOperationException` if the key has not been set, and `ObjectDisposedException` after disposal.
 
 #### 🔒 `Encryption`
 
@@ -153,7 +159,8 @@ Derives internal cipher parameters from the current key. Must be called once aft
 public byte[] Encryption(byte[] data)
 ```
 
-Encrypts the data block **in place** and returns the same array. Data length must be between 1 and 32 bytes. Throws `ArgumentException` for invalid length, `InvalidOperationException` if settings were not generated.
+Encrypts the data block **in place** and returns the same array. Data length must be between 1 and 32 bytes. Throws `ArgumentException` for invalid length, `InvalidOperationException` if settings were not generated, and `ObjectDisposedException` after disposal.
+Also throws `ArgumentNullException` when `data` is `null`.
 
 #### 🔓 `Decryption`
 
@@ -161,7 +168,16 @@ Encrypts the data block **in place** and returns the same array. Data length mus
 public byte[] Decryption(byte[] data)
 ```
 
-Decrypts the data block **in place** and returns the same array. Data length must be between 1 and 32 bytes. Throws `ArgumentException` for invalid length, `InvalidOperationException` if settings were not generated.
+Decrypts the data block **in place** and returns the same array. Data length must be between 1 and 32 bytes. Throws `ArgumentException` for invalid length, `InvalidOperationException` if settings were not generated, and `ObjectDisposedException` after disposal.
+Also throws `ArgumentNullException` when `data` is `null`.
+
+#### 🧹 `Dispose`
+
+```csharp
+public void Dispose()
+```
+
+Zeroes key material and derived settings. Prefer `using var` or call `Dispose()` when done. Encryption, decryption, key changes, and settings generation throw `ObjectDisposedException` after disposal.
 
 ---
 
@@ -171,7 +187,7 @@ Decrypts the data block **in place** and returns the same array. Data length mus
 dotnet test
 ```
 
-Tests are located in [`tests/sBurger256.Tests/`](tests/sBurger256.Tests/) and use **xUnit**. They cover key validation, roundtrip encryption/decryption, determinism, boundary conditions, and wrong-key scenarios.
+Tests are located in [`tests/sBurger256.Tests/`](https://github.com/0xLaileb/sBurger-256/tree/master/tests/sBurger256.Tests) and use **xUnit**. They cover key validation, roundtrip encryption/decryption, deterministic known-answer vectors, boundary conditions, and wrong-key scenarios.
 
 ---
 
@@ -211,4 +227,4 @@ Contributions are welcome! To get started:
 
 ## 📄 License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](https://github.com/0xLaileb/sBurger-256/blob/master/LICENSE).

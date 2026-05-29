@@ -28,6 +28,7 @@ public class sBurger256 : IDisposable
     public const int MaxBlockSize = KeyLength;
 
     private byte[] _key = new byte[KeyLength];
+    private bool _keySet;
     private bool _settingsGenerated;
     private bool _disposed;
 
@@ -47,12 +48,14 @@ public class sBurger256 : IDisposable
     /// </para>
     /// </summary>
     /// <exception cref="ArgumentNullException">Thrown when the value is <c>null</c>.</exception>
-    /// <exception cref="ArgumentException">Thrown when the value length is not 32 bytes.</exception>
+    /// <exception cref="ArgumentException">Thrown when the value length is not 32 bytes or the key is all zeroes.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown by the setter when this cipher instance has been disposed.</exception>
     public byte[] Key
     {
         get => (byte[])_key.Clone();
         set
         {
+            ThrowIfDisposed();
             ArgumentNullException.ThrowIfNull(value);
 
             if (value.Length != KeyLength)
@@ -62,7 +65,13 @@ public class sBurger256 : IDisposable
                     nameof(value));
             }
 
+            if (value.AsSpan().IndexOfAnyExcept((byte)0) < 0)
+            {
+                throw new ArgumentException("Key must not consist entirely of zero bytes.", nameof(value));
+            }
+
             value.CopyTo(_key.AsSpan());
+            _keySet = true;
             _settingsGenerated = false;
         }
     }
@@ -73,7 +82,7 @@ public class sBurger256 : IDisposable
     /// </summary>
     /// <param name="key">A 256-bit (32-byte) encryption key.</param>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="key"/> is <c>null</c>.</exception>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="key"/> length is not 32 bytes.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="key"/> length is not 32 bytes or the key is all zeroes.</exception>
     public sBurger256(byte[] key)
     {
         Key = key;
@@ -93,6 +102,9 @@ public class sBurger256 : IDisposable
     {
         if (_disposed) return;
         CryptographicOperations.ZeroMemory(_key);
+        Array.Clear(_b);
+        Array.Clear(_f);
+        _keySet = false;
         _settingsGenerated = false;
         _disposed = true;
         GC.SuppressFinalize(this);
@@ -107,10 +119,12 @@ public class sBurger256 : IDisposable
     /// </para>
     /// </summary>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the key has not been set (all zeroes).
+    /// Thrown when the key has not been set.
     /// </exception>
+    /// <exception cref="ObjectDisposedException">Thrown when this cipher instance has been disposed.</exception>
     public void GenerationSettings()
     {
+        ThrowIfDisposed();
         EnsureKeyIsSet();
 
         var sumBytes = DefaultTools.SumBytes(_key).ToString().PadLeft(4, '0');
@@ -145,8 +159,10 @@ public class sBurger256 : IDisposable
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="data"/> is <c>null</c>.</exception>
     /// <exception cref="ArgumentException">Thrown when <paramref name="data"/> is empty or exceeds <see cref="MaxBlockSize"/> bytes.</exception>
     /// <exception cref="InvalidOperationException">Thrown when <see cref="GenerationSettings"/> has not been called.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when this cipher instance has been disposed.</exception>
     public byte[] Encryption(byte[] data)
     {
+        ThrowIfDisposed();
         ValidateDataBlock(data);
 
         if (_f[1] % 2 != 0)
@@ -208,8 +224,10 @@ public class sBurger256 : IDisposable
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="data"/> is <c>null</c>.</exception>
     /// <exception cref="ArgumentException">Thrown when <paramref name="data"/> is empty or exceeds <see cref="MaxBlockSize"/> bytes.</exception>
     /// <exception cref="InvalidOperationException">Thrown when <see cref="GenerationSettings"/> has not been called.</exception>
+    /// <exception cref="ObjectDisposedException">Thrown when this cipher instance has been disposed.</exception>
     public byte[] Decryption(byte[] data)
     {
+        ThrowIfDisposed();
         ValidateDataBlock(data);
 
         if (_f[3] % 2 != 0)
@@ -266,15 +284,23 @@ public class sBurger256 : IDisposable
     private static int CharToDigit(char c) => c - '0';
 
     /// <summary>
-    /// Throws if the key is all zeroes (i.e. never set by the caller).
+    /// Throws if the key has not been set by the caller.
     /// </summary>
     private void EnsureKeyIsSet()
     {
-        if (_key.AsSpan().IndexOfAnyExcept((byte)0) < 0)
+        if (!_keySet)
         {
             throw new InvalidOperationException(
                 "Key has not been set. Assign a 256-bit key before calling GenerationSettings().");
         }
+    }
+
+    /// <summary>
+    /// Throws if this cipher instance has already been disposed.
+    /// </summary>
+    private void ThrowIfDisposed()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
     }
 
     /// <summary>

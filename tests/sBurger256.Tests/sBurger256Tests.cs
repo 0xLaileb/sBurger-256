@@ -51,6 +51,19 @@ public class sBurger256Tests
     }
 
     [Fact]
+    public void Key_SetAllZeroKey_ThrowsArgumentException()
+    {
+        var cipher = new sBurger256();
+        Assert.Throws<ArgumentException>(() => cipher.Key = new byte[32]);
+    }
+
+    [Fact]
+    public void Constructor_WithAllZeroKey_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => _ = new sBurger256(new byte[32]));
+    }
+
+    [Fact]
     public void Key_SetCopiesArray_ExternalMutationDoesNotAffectCipher()
     {
         var cipher = new sBurger256();
@@ -219,6 +232,20 @@ public class sBurger256Tests
         cipher.Encryption(data2);
 
         Assert.Equal(data1, data2);
+    }
+
+    [Theory]
+    [InlineData("01", "A7")]
+    [InlineData("0102030405060708090A0B0C0D0E0F10", "A7E0B9A2DFE49582AFE8B1AAD7EC9D9A")]
+    [InlineData("0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F20", "A7E0B9A2DFE49582AFE8B1AAD7EC9D9AB7F0A9B2CFF48592BFF8A1BAC7FC8DAA")]
+    public void Encryption_KnownAnswerVectors_ProduceExpectedCiphertext(string plaintextHex, string expectedCiphertextHex)
+    {
+        var cipher = CreateCipher(TestKey);
+        var data = Convert.FromHexString(plaintextHex);
+
+        cipher.Encryption(data);
+
+        Assert.Equal(expectedCiphertextHex, Convert.ToHexString(data));
     }
 
     [Fact]
@@ -470,5 +497,41 @@ public class sBurger256Tests
         cipher.Dispose();
         var exception = Record.Exception(() => cipher.Dispose());
         Assert.Null(exception);
+    }
+
+    [Fact]
+    public void Dispose_AfterDisposeKeySet_ThrowsObjectDisposedException()
+    {
+        var cipher = new sBurger256(TestKey);
+        cipher.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => cipher.Key = AltKey);
+    }
+
+    [Fact]
+    public void Dispose_AfterDisposeGenerationSettings_ThrowsObjectDisposedException()
+    {
+        var cipher = new sBurger256(TestKey);
+        cipher.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => cipher.GenerationSettings());
+    }
+
+    [Fact]
+    public void Dispose_AfterDisposeEncryption_ThrowsObjectDisposedException()
+    {
+        var cipher = new sBurger256(TestKey);
+        cipher.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => cipher.Encryption([0x01]));
+    }
+
+    [Fact]
+    public void Dispose_AfterDisposeDecryption_ThrowsObjectDisposedException()
+    {
+        var cipher = new sBurger256(TestKey);
+        cipher.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => cipher.Decryption([0x01]));
     }
 }
