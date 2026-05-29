@@ -83,7 +83,7 @@ Install-Package sBurger256
 Or add directly to your `.csproj`:
 
 ```xml
-<PackageReference Include="sBurger256" Version="2.0.1" />
+<PackageReference Include="sBurger256" Version="2.0.4" />
 ```
 
 ---
